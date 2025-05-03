@@ -1,18 +1,10 @@
 import os
 import sys
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler
+
+from default_response import default_response
 
 TELEGRAM_KEY_PATH = 'TELEGRAM_API_KEY'
-
-
-async def default_response(update: Update, _context: ContextTypes.DEFAULT_TYPE):
-    if update.message is None:
-        raise NotImplementedError('TODO: Understand why this could happen.')
-
-    _ = await update.message.reply_text(
-        '¡Hola! Soy el bot de Telegram de Cristian Rodríguez. ¿Quieres contar o saber del clima en to zona?'
-    )
 
 
 def dev():
