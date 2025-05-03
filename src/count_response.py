@@ -1,14 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes
 
-# Placeholder, will use db
-counter = 0
-
-
-async def increase_user_count(_userId: int) -> int:
-    global counter
-    counter += 1
-    return counter
+from db.queries import increase_user_count
 
 
 async def count_response(update: Update, _context: ContextTypes.DEFAULT_TYPE):
@@ -19,7 +12,7 @@ async def count_response(update: Update, _context: ContextTypes.DEFAULT_TYPE):
         _ = update.message.reply_text('Lo siento, no te pudimos identificar.')
         return
 
-    new_count = await increase_user_count(_userId=update.effective_user.id)
+    new_count = await increase_user_count(user_id=update.effective_user.id)
 
     _ = await update.message.reply_text(
         f'¡Después del {new_count - 1} va el {new_count}! \n'
