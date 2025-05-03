@@ -1,23 +1,25 @@
 import os
 import sys
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler
+
+import count_response
+from db.helpers import reinit_if_no_db
+import default_response
 
 TELEGRAM_KEY_PATH = 'TELEGRAM_API_KEY'
 
+COMMANDS = [
+    CommandHandler('start', default_response.default_response),
+    CommandHandler('count', count_response.count_response),
+]
 
-async def default_response(update: Update, _context: ContextTypes.DEFAULT_TYPE):
-    if update.message is None:
-        raise NotImplementedError('TODO: Understand why this could happen.')
 
-    _ = await update.message.reply_text(
-        '¡Hola! Soy el bot de Telegram de Cristian Rodríguez. ¿Quieres contar o saber del clima en to zona?'
-    )
-
+async def on_bot_start(_):
+    print("Bot iniciado.")
+    await reinit_if_no_db()
+    print("Base de datos funcional.")
 
 def dev():
-    print('Iniciando bot...')
-
     token = os.getenv(TELEGRAM_KEY_PATH)
 
     if token is None:
@@ -26,8 +28,11 @@ def dev():
         )
         return sys.exit(1)
 
-    app = ApplicationBuilder().token(token).build()
-    app.add_handler(CommandHandler('start', default_response))
+    app = ApplicationBuilder().token(token).post_init(on_bot_start).build()
+    for command in COMMANDS:
+        app.add_handler(command)
+
+    print('Iniciando bot...')
     app.run_polling()
 
 
