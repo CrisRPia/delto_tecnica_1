@@ -5,7 +5,7 @@ import aiosqlite
 
 PARENT_DIR = Path(__file__).resolve().parent
 DATA_DIR = PARENT_DIR.parent.parent / 'data'
-DB_PATH = DATA_DIR / 'data.db'
+DB_PATH = DATA_DIR / 'db.sqlite'
 INIT_PATH = DATA_DIR / 'init.sql'
 
 
