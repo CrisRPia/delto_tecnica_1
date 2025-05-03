@@ -9,3 +9,5 @@ async def default_response(update: Update, _context: ContextTypes.DEFAULT_TYPE):
         '¡Hola! Soy el bot de Telegram de Cristian Rodríguez. ¿Quieres contar o saber del clima en to zona?'
     )
 
+    # TODO: Give command-run instructions or buttons.
+

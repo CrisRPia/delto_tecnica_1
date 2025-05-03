@@ -2,14 +2,17 @@ import os
 import sys
 from telegram.ext import ApplicationBuilder, CommandHandler
 
-from default_response import default_response
+import count_response
+import default_response
 
 TELEGRAM_KEY_PATH = 'TELEGRAM_API_KEY'
 
+COMMANDS = [
+    CommandHandler('start', default_response.default_response),
+    CommandHandler('count', count_response.count_response),
+]
 
 def dev():
-    print('Iniciando bot...')
-
     token = os.getenv(TELEGRAM_KEY_PATH)
 
     if token is None:
@@ -19,7 +22,10 @@ def dev():
         return sys.exit(1)
 
     app = ApplicationBuilder().token(token).build()
-    app.add_handler(CommandHandler('start', default_response))
+    for command in COMMANDS:
+        app.add_handler(command)
+
+    print('Iniciando bot...')
     app.run_polling()
 
 
