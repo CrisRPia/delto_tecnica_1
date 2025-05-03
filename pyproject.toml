@@ -7,10 +7,11 @@ requires-python = ">=3.13"
 authors = [{ name = "Cristian Rodríguez", email = "cristian2x1002@gmail.com" }]
 dependencies = [
     "aiosqlite>=0.21.0",
+    "python-telegram-bot>=22.0",
 ]
 
 [project.scripts]
-main = "main:main"
+dev = "main:dev"
 
 [tool.uv]
 package = true
@@ -22,4 +23,3 @@ line-length = 80
 quote-style = "single"
 indent-style = "space"
 docstring-code-format = true
-
