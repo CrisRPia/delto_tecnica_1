@@ -45,10 +45,6 @@ class OpenWeatherClient:
 
             params += [f'{option}={value}' for option, value in opts.items()]
 
-            print(params)
-
-            print('&'.join(params))
-
             async with session.get(
                 url=url, params='&'.join(params)
             ) as response:

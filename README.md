@@ -26,6 +26,6 @@ Incluir los campos de [el archivo de ejemplo](./env.example) en .env.
     3. El resto de librerías que encontré son muy impopulares, por lo que no
        confío en ellas.
 
-- Persisto estado mediante sqlite para les resulte más sencillo ejecutar el
+- Persisto estado mediante sqlite para que les resulte más sencillo ejecutar el
   proyecto, ya que python incluye sqlite en su intérprete. Es posible que esto
   sea redundante si decido añadir Docker al proyecto.

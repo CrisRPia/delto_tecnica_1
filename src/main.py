@@ -1,9 +1,9 @@
 import os
-from telegram.ext import ApplicationBuilder, CommandHandler
-from apis.openweather import OpenWeatherClient
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
 import count_response
 from db.helpers import reinit_if_no_db
 import default_response
+import weather_response
 
 TELEGRAM_KEY_PATH = 'TELEGRAM_API_KEY'
 TELEGRAM_TOKEN = os.environ[TELEGRAM_KEY_PATH]
@@ -11,6 +11,7 @@ TELEGRAM_TOKEN = os.environ[TELEGRAM_KEY_PATH]
 COMMANDS = [
     CommandHandler('start', default_response.default_response),
     CommandHandler('count', count_response.count_response),
+    MessageHandler(filters.LOCATION, weather_response.location_response),
 ]
 
 
