@@ -39,7 +39,7 @@ class Clouds(BaseModel):
 class Sys(BaseModel):
     type: int | None = None
     id: int | None = None
-    country: str
+    country: str | None = None
     sunrise: int
     sunset: int
 
