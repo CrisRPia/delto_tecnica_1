@@ -31,6 +31,7 @@ async def on_bot_start(app: Application[Bot, _, _, _, _, _]):
 
 
 def dev():
+    """ Entry point """
     app = (
         ApplicationBuilder()
         .token(TELEGRAM_TOKEN)

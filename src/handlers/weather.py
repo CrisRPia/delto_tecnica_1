@@ -5,7 +5,7 @@ from telegram.ext import ContextTypes
 
 from apis.openweather import DEFAULT_WEATHER_CLIENT
 from db.queries import get_user
-from handlers.location import please_update_location_response
+from handlers.location import please_update_location_handler
 
 
 async def weather_handler(
@@ -23,7 +23,7 @@ async def weather_handler(
 
     user = await get_user(update.effective_user.id)
     if not user or not user.longitude is not None or user.latitude is None:
-        return await please_update_location_response(update, context)
+        return await please_update_location_handler(update, context)
 
     weather = await DEFAULT_WEATHER_CLIENT.get_weather(
         {
