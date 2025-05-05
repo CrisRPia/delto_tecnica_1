@@ -65,8 +65,6 @@ async def ai_response(update: Update, _context: ContextTypes.DEFAULT_TYPE):
         Si es posible hacer una relación, haz comentarios sobre los temas pasados, o sobre el progreso contando del usuario.
     """)
 
-    print(prompt)
-
     async with AsyncGroq() as groq_client:
         result = await groq_client.chat.completions.create(
             model='deepseek-r1-distill-llama-70b',
@@ -82,7 +80,6 @@ async def ai_response(update: Update, _context: ContextTypes.DEFAULT_TYPE):
         )
 
     message = result.choices[0].message.content
-    print(message)
     assert message
     parsed_message = ExpectedResponse.model_validate_json(message)
 
