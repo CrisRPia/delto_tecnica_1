@@ -1,18 +1,15 @@
+"""
+Collection of all queries made in the app.
+
+Many of them try to insert a new user first, and then update the actual data
+they want to update. I did it this way because I believe it is possible to run
+the commands in any order, which means /start needn't be first, and so I chose
+for most queries to work fine if used by a new user. -- CR
+"""
+
 from typing import NamedTuple
 
 from db.helpers import get_connection
-
-
-async def insert_user(user_id: int):
-    async with get_connection() as connection:
-        _ = await connection.execute(
-            """
-            INSERT
-              INTO users(telegram_id)
-            VALUES :user_id;
-        """,
-            {'user_id': user_id},
-        )
 
 
 async def increase_user_count(user_id: int) -> int:
@@ -36,6 +33,8 @@ async def increase_user_count(user_id: int) -> int:
 
         assert row is not None and isinstance(row[0], int)
 
+        # I lost way more time than I should have forgetting to commit db
+        # changes -- CR
         await connection.commit()
         return row[0]  # pyright: ignore [reportAny]
 
@@ -84,10 +83,12 @@ async def get_user(user_id: int) -> UserRow | None:
 
         return UserRow._make(row)
 
+
 class FunFactRow(NamedTuple):
     fun_fact_summary: int
     counter_at_creation: int
     timestamp: str
+
 
 async def get_users_fun_facts(user_id: int) -> list[FunFactRow]:
     async with get_connection() as connection:
@@ -105,7 +106,13 @@ async def get_users_fun_facts(user_id: int) -> list[FunFactRow]:
 
         return [FunFactRow._make(row) for row in rows]
 
+
 async def insert_fun_fact(user_id: int, fun_fact_summary: str):
+    """
+    Inserts a new fun fact summary in the database. This will error if `user_id`
+    does not already exist within the database. This is intentional, because
+    /ai is not an entry point by design.
+    """
     async with get_connection() as connection:
         _ = await connection.execute(
             """
@@ -117,10 +124,7 @@ async def insert_fun_fact(user_id: int, fun_fact_summary: str):
                      WHERE users.telegram_id = :user_id
                 ));
             """,
-            {
-                'user_id': user_id,
-                "fun_fact_summary": fun_fact_summary
-            },
+            {'user_id': user_id, 'fun_fact_summary': fun_fact_summary},
         )
 
         await connection.commit()
