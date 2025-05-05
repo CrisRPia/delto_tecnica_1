@@ -13,8 +13,8 @@ Incluir los campos de [el archivo de ejemplo](./env.example) en .env.
 - [x] Implementar autocompletado de comandos.
 - [x] Implementar contador
 - [x] Implementar clima.
-- [ ] Notificar errores al usuario.
-- [ ] Implementar IA.
+- [x] Notificar errores al usuario.
+- [x] Implementar IA.
 
 ### Notas
 

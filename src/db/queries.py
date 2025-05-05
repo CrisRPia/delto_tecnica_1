@@ -83,3 +83,44 @@ async def get_user(user_id: int) -> UserRow | None:
             return None
 
         return UserRow._make(row)
+
+class FunFactRow(NamedTuple):
+    fun_fact_summary: int
+    counter_at_creation: int
+    timestamp: str
+
+async def get_users_fun_facts(user_id: int) -> list[FunFactRow]:
+    async with get_connection() as connection:
+        result = await connection.execute(
+            """
+            SELECT fun_fact_summary, counter_at_creation, timestamp
+              FROM fun_facts where user_id = :user_id
+             ORDER BY timestamp DESC
+             LIMIT 20;
+        """,
+            {'user_id': user_id},
+        )
+
+        rows = await result.fetchall()
+
+        return [FunFactRow._make(row) for row in rows]
+
+async def insert_fun_fact(user_id: int, fun_fact_summary: str):
+    async with get_connection() as connection:
+        _ = await connection.execute(
+            """
+                INSERT
+                  INTO fun_facts (user_id, fun_fact_summary, counter_at_creation)
+                VALUES (:user_id, :fun_fact_summary, (
+                    SELECT counter
+                      FROM users
+                     WHERE users.telegram_id = :user_id
+                ));
+            """,
+            {
+                'user_id': user_id,
+                "fun_fact_summary": fun_fact_summary
+            },
+        )
+
+        await connection.commit()

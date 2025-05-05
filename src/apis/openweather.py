@@ -51,5 +51,9 @@ class OpenWeatherClient:
                 text = await response.text()
                 try:
                     return WeatherData.model_validate_json(text)
-                except Exception:
-                    raise Exception("Error while parsing: " + text)
+                except Exception as e:
+                    print("Error while parsing:", text)
+                    raise e
+
+DEFAULT_WEATHER_CLIENT = OpenWeatherClient()
+

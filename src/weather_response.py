@@ -3,11 +3,9 @@ from telegram.helpers import escape_markdown
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
-from apis.openweather import OpenWeatherClient
+from apis.openweather import DEFAULT_WEATHER_CLIENT
 from db.queries import get_user
 from location_response import please_update_location_response
-
-WEATHER_CLIENT = OpenWeatherClient()
 
 
 async def weather_request_response(
@@ -19,7 +17,7 @@ async def weather_request_response(
     if user is None or user.longitude is None or user.latitude is None:
         return await please_update_location_response(update, context)
 
-    weather = await WEATHER_CLIENT.get_weather(
+    weather = await DEFAULT_WEATHER_CLIENT.get_weather(
         {
             'lat': user.latitude,
             'lon': user.longitude,
@@ -35,8 +33,15 @@ async def weather_request_response(
     def mdv2round(number: float):
         return mdv2(f'{number:.1f}')
 
+    country = weather.sys.country
+    country_string =(
+        mdv2(', ' + country)
+        if country
+        else f'{mdv2round(user.latitude)}, {mdv2round(user.longitude)}'
+    )
+
     response = f"""
-🌍 El clima en *{mdv2(weather.name)}, {mdv2(weather.sys.country)}*: *{mdv2(weather.weather[0].description)}*\\.
+🌍 El clima en *{mdv2(weather.name)}{country_string}*: *{mdv2(weather.weather[0].description)}*\\.
 
 🌡️ *Temperatura:*
   Actual: {mdv2round(weather.main.temp)}°C
