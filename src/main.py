@@ -4,6 +4,7 @@ from telegram import Bot
 from telegram.ext import Application, ApplicationBuilder
 from commands import BOT_COMMANDS, HANDLERS
 from db.helpers import reinit_if_no_db
+from errors import error_handler
 
 TELEGRAM_KEY_PATH = 'TELEGRAM_API_KEY'
 TELEGRAM_TOKEN = os.environ[TELEGRAM_KEY_PATH]
@@ -33,6 +34,7 @@ def dev():
 
     for handler in HANDLERS:
         app.add_handler(handler)
+    app.add_error_handler(error_handler, block=True) # pyright: ignore [reportUnknownArgumentType]
     print('Iniciando bot...')
     app.run_polling()
 
