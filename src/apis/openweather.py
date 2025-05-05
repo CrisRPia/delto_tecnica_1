@@ -48,4 +48,8 @@ class OpenWeatherClient:
             async with session.get(
                 url=url, params='&'.join(params)
             ) as response:
-                return WeatherData.model_validate_json(await response.text())
+                text = await response.text()
+                try:
+                    return WeatherData.model_validate_json(text)
+                except:
+                    raise Exception("Error while parsing: " + text)
