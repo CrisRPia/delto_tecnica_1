@@ -4,9 +4,9 @@ from telegram.ext import ContextTypes
 from db.queries import set_user_coordinates
 
 
-async def location_response(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+async def location_handler(update: Update, _context: ContextTypes.DEFAULT_TYPE):
     """
-    Response for a location-sharing message.
+    Response for a location-sharing message. It stores it in the database.
     """
     assert (
         update.message is not None
@@ -27,7 +27,7 @@ async def location_response(update: Update, _context: ContextTypes.DEFAULT_TYPE)
     )
 
 
-async def please_update_location_response(
+async def please_update_location_handler(
     update: Update, _context: ContextTypes.DEFAULT_TYPE
 ):
     """

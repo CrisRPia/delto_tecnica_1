@@ -4,13 +4,11 @@ from telegram.ext import ContextTypes
 from db.queries import increase_user_count
 
 
-async def count_response(update: Update, _context: ContextTypes.DEFAULT_TYPE):
-    if update.message is None:
-        raise NotImplementedError()
-
-    if update.effective_user is None:
-        _ = update.message.reply_text('Lo siento, no te pudimos identificar.')
-        return
+async def count_handler(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    """
+    Increases the user's counter and sends them a message with it.
+    """
+    assert update.message and update.effective_user
 
     new_count = await increase_user_count(user_id=update.effective_user.id)
 

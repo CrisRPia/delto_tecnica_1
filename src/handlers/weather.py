@@ -5,17 +5,25 @@ from telegram.ext import ContextTypes
 
 from apis.openweather import DEFAULT_WEATHER_CLIENT
 from db.queries import get_user
-from location_response import please_update_location_response
+from handlers.location import please_update_location_handler
 
 
-async def weather_request_response(
+async def weather_handler(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
-    assert update.effective_user is not None and update.message is not None
-    user = await get_user(update.effective_user.id)
+    """
+    Verifies if user has shared a location and, if so, sends them a summary
+    of their weather. It uses a precise location shared by the user instead
+    of a city name.
 
-    if user is None or user.longitude is None or user.latitude is None:
-        return await please_update_location_response(update, context)
+    I am aware openweather can accept a city name, but I think this method
+    offers more flexibility, precision, and DX. -- CR
+    """
+    assert update.effective_user and update.message
+
+    user = await get_user(update.effective_user.id)
+    if not user or not user.longitude is not None or user.latitude is None:
+        return await please_update_location_handler(update, context)
 
     weather = await DEFAULT_WEATHER_CLIENT.get_weather(
         {
@@ -33,8 +41,10 @@ async def weather_request_response(
     def mdv2round(number: float):
         return mdv2(f'{number:.1f}')
 
+    # I need to do this check because there will be no country information if
+    # the location is, say, the Pacitic Ocean.
     country = weather.sys.country
-    country_string =(
+    country_string = (
         mdv2(', ' + country)
         if country
         else f'{mdv2round(user.latitude)}, {mdv2round(user.longitude)}'

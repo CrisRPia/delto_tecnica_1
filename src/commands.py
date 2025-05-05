@@ -1,14 +1,18 @@
+"""
+Collection of constants regarding command handlers.
+"""
+
 from collections.abc import Coroutine
 from typing import Any, Callable, TypedDict
 
 from telegram import BotCommand, Update
 from telegram.ext import CommandHandler, ContextTypes, MessageHandler, filters
 
-from ai_response import ai_response
-import count_response
-from default_response import default_response
-import location_response
-from weather_response import weather_request_response
+from handlers.ai import ai_handler
+from handlers.count import count_handler
+from handlers.location import location_handler
+from handlers.start import start_handler
+from handlers.weather import weather_handler
 
 
 class CommandOptions(TypedDict):
@@ -24,20 +28,20 @@ SLASH_COMMANDS: list[CommandOptions] = [
     {
         "command": "ai",
         "description": "🤖 Obtén un mensaje de IA basado en la información de este chat.",
-        "callback": ai_response,
+        "callback": ai_handler,
     },
     {
-        'callback': default_response,
+        'callback': start_handler,
         'command': 'start',
         'description': '👋 Bienvenida',
     },
     {
-        'callback': count_response.count_response,
+        'callback': count_handler,
         'command': 'count',
         'description': '#️⃣¡ Contar de 1 en 1, hasta 999!',
     },
     {
-        'callback': weather_request_response,
+        'callback': weather_handler,
         'command': 'weather',
         'description': '🌤️ Obtén información del tiempo en una ubicación.',
     },
@@ -50,5 +54,5 @@ BOT_COMMANDS: list[BotCommand] = [
 HANDLERS = [
     CommandHandler(sc['command'], sc['callback']) for sc in SLASH_COMMANDS
 ] + [
-    MessageHandler(filters.LOCATION, location_response.location_response),
+    MessageHandler(filters.LOCATION, location_handler),
 ]

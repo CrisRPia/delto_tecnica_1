@@ -14,8 +14,14 @@ class ExpectedResponse(BaseModel):
     fun_fact_summary: str
 
 
-async def ai_response(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+async def ai_handler(update: Update, _context: ContextTypes.DEFAULT_TYPE):
+    """
+    Sends the user a "fun" response, which is aware of their counter, previous ai
+    answers, and the weather in their associated location.
+    """
     assert update.effective_user and update.message
+
+    # Get data
     user, fun_facts = await asyncio.gather(
         get_user(update.effective_user.id),
         get_users_fun_facts(update.effective_user.id),
@@ -39,14 +45,15 @@ async def ai_response(update: Update, _context: ContextTypes.DEFAULT_TYPE):
             }
         )
 
+    # Make prompt
     weather_prompt = (
         'El usuario no ha explorado la funcionalidad de ubicación con anterioridad, recuérdaselo amenos que ya se lo hayas recordado.'
         if not weather
-        else f'Menciona algo del clima de su última ubicación, el cúal es: {weather.model_dump_json(indent=2)}'
+        else f'Menciona algo del clima de su última ubicación, la cual es: {weather.model_dump_json(indent=2)}'
     )
 
     prompt = dedent(f"""
-        Eres un chatbot de Telegram desarrollado por la empresa Delto que tiene que responder al comand /ai. Hablarás con {update.effective_user.name}.
+        Eres un chatbot de Telegram desarrollado por la empresa Delto que tiene que responder al comando /ai. Hablarás con {update.effective_user.name}.
         El usuario puede ejecutar un comando para aumentar un contador. Actualmente tiene el valor {user.counter}. Dile un dato curioso sobre el mismo. Cuando el valor se repite, dile uno diferente.
         El usuario pudo haber compartido una ubicación (no necesariamente su ubicación) con el bot para pedir información del clima.
         {weather_prompt}
@@ -59,12 +66,13 @@ async def ai_response(update: Update, _context: ContextTypes.DEFAULT_TYPE):
         TIENES QUE HABLAR EN ESPAÑOL.
 
         FUN FACT SUMMARY TIENE QUE SER BREVE. ESCRÍBELO PARA RECONOCER LOS DATOS CURIOSOS QUE HAS DICHO PREVIAMENTE, Y QUÉ RECORDATORIOS HAS HECHO.
-        Previamente has dicho los siguientes datos curiosos a este usuario: {str([ff.fun_fact_summary for ff in fun_facts])}. No repitas los datos. Es preferible que digas que no tienes nuevos datos curiosos a que te repitas.
+        Previamente has dicho los siguientes datos curiosos a este usuario: {[ff.fun_fact_summary for ff in fun_facts]}. No repitas los datos. Es preferible que digas que no tienes nuevos datos curiosos a que te repitas.
 
         No es necesario que repitas hablar del clima si no ha cambiado desde la última vez.
         Si es posible hacer una relación, haz comentarios sobre los temas pasados, o sobre el progreso contando del usuario.
     """)
 
+    # Groq
     async with AsyncGroq() as groq_client:
         result = await groq_client.chat.completions.create(
             model='deepseek-r1-distill-llama-70b',
@@ -79,10 +87,12 @@ async def ai_response(update: Update, _context: ContextTypes.DEFAULT_TYPE):
             reasoning_format="hidden"
         )
 
+    # Parse
     message = result.choices[0].message.content
     assert message
     parsed_message = ExpectedResponse.model_validate_json(message)
 
+    # Reply
     _ = await asyncio.gather(
         insert_fun_fact(
             update.effective_user.id, parsed_message.fun_fact_summary

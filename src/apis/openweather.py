@@ -39,6 +39,10 @@ class OpenWeatherClient:
         self.token = token
 
     async def get_weather(self, opts: GetWeatherParams) -> WeatherData:
+        """
+        Get weather at some coordinates.
+        It parses the obtained weather and returns if sueccesful.
+        """
         async with aiohttp.ClientSession() as session:
             url = self.baseUrl
             params: list[str] = [f'appid={self.token}']
@@ -52,8 +56,8 @@ class OpenWeatherClient:
                 try:
                     return WeatherData.model_validate_json(text)
                 except Exception as e:
-                    print("Error while parsing:", text)
+                    print('Error while parsing:', text)
                     raise e
 
-DEFAULT_WEATHER_CLIENT = OpenWeatherClient()
 
+DEFAULT_WEATHER_CLIENT = OpenWeatherClient()
