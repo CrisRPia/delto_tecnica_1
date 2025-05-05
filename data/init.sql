@@ -9,6 +9,6 @@ INSERT
   INTO users(telegram_id, counter, latitude, longitude)
 VALUES (:telegram_id, :counter, DEFAULT, DEFAULT)
     ON CONFLICT (telegram_id) DO UPDATE SET latitude = :latitude
-     , longitude                       = :longitude
+     , longitude                       = :longitude;
 
 select * from users;

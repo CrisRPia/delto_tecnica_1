@@ -1,54 +1,56 @@
 from telegram import Update
+from telegram.helpers import escape_markdown
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
-from db.queries import get_user, set_user_coordinates
+from apis.openweather import OpenWeatherClient
+from db.queries import get_user
+from location_response import please_update_location_response
+
+WEATHER_CLIENT = OpenWeatherClient()
 
 
 async def weather_request_response(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ):
-    assert update.effective_user is not None
+    assert update.effective_user is not None and update.message is not None
     user = await get_user(update.effective_user.id)
 
     if user is None or user.longitude is None or user.latitude is None:
-        return please_update_location_response(update, context)
-    ... # TODO
+        return await please_update_location_response(update, context)
 
-
-async def location_response(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Response for a location-sharing message.
-    """
-    assert (
-        update.message is not None
-        and update.message.location is not None
-        and update.effective_user is not None
+    weather = await WEATHER_CLIENT.get_weather(
+        {
+            'lat': user.latitude,
+            'lon': user.longitude,
+            'lang': 'es',
+            'units': 'metric',
+        }
     )
 
-    location = update.message.location
+    # Shortened this just so that the `response` string is more readable.
+    def mdv2(text: str):
+        return escape_markdown(text, version=2)
 
-    await set_user_coordinates(
-        update.effective_user.id,
-        location.latitude,
-        location.longitude,
-    )
+    def mdv2round(number: float):
+        return mdv2(f'{number:.1f}')
+
+    response = f"""
+🌍 El clima en *{mdv2(weather.name)}, {mdv2(weather.sys.country)}*: *{mdv2(weather.weather[0].description)}*\\.
+
+🌡️ *Temperatura:*
+  Actual: {mdv2round(weather.main.temp)}°C
+  Sensación térmica: {mdv2round(weather.main.feels_like)}°C
+  Mínima: {mdv2round(weather.main.temp_min)}°C
+  Máxima: {mdv2round(weather.main.temp_max)}°C
+
+💧 *Humedad:* {weather.main.humidity}%
+
+💨 *Viento:* {mdv2round(weather.wind.speed)} m/s
+
+☁️ *Nubosidad:* {weather.clouds.all}%
+"""
 
     _ = await update.message.reply_text(
-        'Tu ubicación a sido actualizada. La recordaré para futuras peticiones.'
-    )
-
-
-async def please_update_location_response(
-    update: Update, _context: ContextTypes.DEFAULT_TYPE
-):
-    """
-    Response to ask the user to update their location.
-    """
-    assert update.message is not None
-
-    # I'm aware that I could create a button that asks for the user's location
-    # via a dialog. However, I believe once the user learns that they can share
-    # it this way, directly sharing is better DX.
-    _ = await update.message.reply_text(
-        'Por favor, comparte una ubicación con nosotros. Mediante la interfaz de telegram, como en cualquier otro chat.'
+        response, parse_mode=ParseMode.MARKDOWN_V2
     )

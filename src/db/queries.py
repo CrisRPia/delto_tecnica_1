@@ -25,7 +25,7 @@ async def increase_user_count(user_id: int) -> int:
             """
             INSERT
               INTO users(telegram_id)
-            VALUES (:telegram_id)
+            VALUES (:user_id)
                     ON CONFLICT (telegram_id) DO UPDATE SET counter = counter + 1
          RETURNING counter;
         """,

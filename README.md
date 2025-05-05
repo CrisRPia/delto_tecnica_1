@@ -10,9 +10,9 @@ Incluir los campos de [el archivo de ejemplo](./env.example) en .env.
 
 ### TODOs
 
-- [ ] Utilizar botones para realizar acciones.
+- [x] Implementar autocompletado de comandos.
 - [x] Implementar contador
-- [ ] Implementar clima.
+- [x] Implementar clima.
 - [ ] Implementar IA.
 
 ### Notas
